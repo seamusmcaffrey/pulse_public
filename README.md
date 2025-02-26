@@ -1,51 +1,54 @@
-# Pulse Scientific Chrome Extension
+# Pulse Scientific Overlay
 
 ## Overview
 
-The Pulse Scientific Chrome Extension adds an interactive overlay to research articles, providing expert commentary and social discussion features. The extension creates a collaborative environment where insights can be shared directly on research papers.
+A lightweight overlay for research articles that displays study metadata, expert commentary, and trending research. The overlay provides a clean, non-intrusive interface for viewing research context and expert insights.
 
 ## Key Features
 
 ### 1. Research Metadata Display
-- **Study Information**: Clear visualization of key study metrics
-  - Sample size and demographics
-  - Study duration
-  - Effect size
-  - Research design
-  - Rigor assessment
+- Sample size and demographics
+- Study duration
+- Effect size
+- Research design
+- Rigor assessment
 
 ### 2. Expert Commentary
-- **Left Sidebar**: Displays verified expert comments
-- **Verification Badges**: Visual indicators for verified experts
-- **Engagement Features**: Like and reply functionality
-- **Demo Mode**: Pre-loaded expert comments for demonstration
+- Left sidebar with expert insights
+- Expert profiles with avatars
+- Verification badges for experts
+- Timestamp display
 
-### 3. Social Discussion
-- **Right Sidebar**: Community discussion and trending research
-- **Comment System**: User-friendly interface for posting comments
-- **Trending Section**: Highlights popular research papers
-- **Engagement Metrics**: Shows likes and replies for each comment
+### 3. Trending Research
+- Curated list of related papers
+- Journal references
+- Quick access to popular research
 
 ### 4. Modern UI/UX
-- **Clean Interface**: Non-intrusive overlay design
-- **Responsive Layout**: Adapts to different screen sizes
-- **Visual Hierarchy**: Clear distinction between expert and social content
-- **Interactive Elements**: Hover states and action buttons
+- Clean, minimal interface
+- Responsive layout
+- Interactive hover states
+- Consistent visual hierarchy
 
 ## Project Structure
 
 ```
-pulsev3/
+pulse-scientific-overlay/
 ├── public/
-│   ├── manifest.json      # Extension manifest
 │   ├── content.js         # Main overlay injection script
 │   ├── content.css        # Overlay styles
-│   ├── background.js      # Service worker for auth
 │   ├── config.js          # Demo data configuration
+│   ├── manifest.json      # Extension manifest
 │   └── icons/            # Extension icons
-├── scripts/
-│   └── build-extension-simple.js  # Build script
-└── package.json          # Project dependencies
+├── src/
+│   ├── components/ui/    # UI components
+│   │   ├── button.tsx    # Button component
+│   │   ├── dialog.tsx    # Modal dialogs
+│   │   └── hover-card.tsx # Tooltips
+│   ├── utils/           # Utility functions
+│   │   └── utils.ts     # Tailwind utilities
+│   └── index.css        # Tailwind setup
+└── package.json         # Dependencies
 ```
 
 ## Getting Started
@@ -61,7 +64,7 @@ pulsev3/
 ```bash
 # Clone the repository
 git clone https://github.com/seamusmcaffrey/pulse_public
-cd pulse_public
+cd pulse-scientific-overlay
 
 # Install dependencies
 npm install
@@ -70,54 +73,39 @@ npm install
 ### Development
 
 ```bash
-# Build the extension
-npm run build:all
+
+# Build for production
+npm run build
+
 ```
 
-### Loading the Extension in Chrome
+### Loading in Chrome
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked" and select the `dist/` directory
-4. The extension should now appear in your browser
+4. The extension should appear in your browser
 
-## Development Best Practices
+## Development Guidelines
 
-1. **Build Process**
-   - Always use `npm run build:all` for complete builds
-   - Verify the contents of the `dist/` directory after building
+### 1. Component Structure
+- UI components are in `src/components/ui/`
+- Tailwind utilities in `src/utils/utils.ts`
+- Styles in `public/content.css`
 
-2. **Testing Changes**
-   - After making changes, run a complete build
-   - Reload the extension in Chrome's extension manager
-   - Clear browser cache if needed
-   - Check the browser console for any errors
+### 2. Configuration
+- Demo data and settings in `public/config.js`
+- Metadata and comments can be customized
+- Trending articles can be updated
 
-3. **Code Organization**
-   - Keep content script modifications in `public/content.js`
-   - Background script logic belongs in `public/background.js`
-   - Styles should be in `public/content.css`
-   - Demo data configuration in `public/config.js`
+### 3. Styling
+- Uses Tailwind CSS for styling
+- CSS variables for theming in content.css
+- Responsive design patterns
+- Interactive states via Tailwind classes
 
-## UI Components
-
-### Header
-- Pink-themed header bar with Pulse logo
-- Metadata tags showing study information
-- Google sign-in integration
-
-### Expert Commentary
-- Left sidebar with verified expert comments
-- Expert profiles with avatars and titles
-- Engagement metrics and actions
-
-### Social Discussion
-- Right sidebar with community comments
-- Comment composition interface
-- Trending research section with rankings
-
-### Styling
-- CSS variables for consistent theming
-- Responsive layout adjustments
-- Modern scrollbar styling
-- Interactive hover states
+### 4. Testing
+- Test in Chrome after building
+- Check overlay rendering
+- Verify hover interactions
+- Ensure responsive behavior

@@ -1,9 +1,14 @@
 // Global configuration object
 window.config = {
-  // Demo mode - no actual backend connection
-  demoMode: true,
+  // Demo data for overlay display
+  metadata: {
+    sampleSize: "1000 students, K-5",
+    duration: "2 years",
+    effectSize: "d = 0.45",
+    design: "RCT",
+    rigor: "Tier 1"
+  },
   
-  // Demo data
   demoComments: [
     {
       id: 1,
@@ -24,16 +29,17 @@ window.config = {
       },
       text: "The findings align well with recent studies in the field. I particularly appreciate the detailed discussion of limitations and potential future directions.",
       timestamp: "2024-03-21T15:45:00Z"
+    }
+  ],
+  
+  trendingArticles: [
+    {
+      title: "Impact of Early Literacy Interventions on Reading Comprehension",
+      journal: "Educational Research Review"
     },
     {
-      id: 3,
-      author: {
-        name: "Dr. Emily Martinez",
-        title: "Lead Researcher, Brain-Computer Interfaces",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily"
-      },
-      text: "The statistical analysis is thorough and the conclusions are well-supported by the data. This work could have significant implications for BCI development.",
-      timestamp: "2024-03-22T09:15:00Z"
+      title: "Meta-Analysis of Physical Activity in Education",
+      journal: "Journal of Educational Psychology"
     }
   ]
 };

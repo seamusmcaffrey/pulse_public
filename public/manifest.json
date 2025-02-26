@@ -1,29 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Pulse Scientific Simplified",
+  "name": "Pulse Scientific Overlay",
   "version": "1.0",
-  "description": "Expert commentary on research articles",
+  "description": "Research article overlay display",
   "permissions": [
-    "identity",
-    "identity.email",
     "storage"
   ],
-  "oauth2": {
-    "client_id": "980371095085-35ohqje4ev5t3pe5clg1610o8t5l48a0.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/userinfo.profile"
-    ]
-  },
   "action": {
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
-  },
-  "background": {
-    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -36,11 +24,5 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["config.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }
