@@ -1,9 +1,41 @@
 // Global configuration object
 window.config = {
-  supabase: {
-    url: 'https://xuypxquhkubappzovinl.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1eXB4cXVoa3ViYXBwem92aW5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzMTEzMTUsImV4cCI6MjA1NDg4NzMxNX0.704l61wPoYoVQe7Iu5GvpBDPi8xfVh6eD8HYdfWkliE'
-  }
+  // Demo mode - no actual backend connection
+  demoMode: true,
+  
+  // Demo data
+  demoComments: [
+    {
+      id: 1,
+      author: {
+        name: "Dr. Sarah Johnson",
+        title: "Professor of Neuroscience, Stanford University",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah"
+      },
+      text: "This research presents a fascinating approach to understanding neural plasticity. The methodology is particularly robust, though I would suggest additional control experiments in future studies.",
+      timestamp: "2024-03-20T10:30:00Z"
+    },
+    {
+      id: 2,
+      author: {
+        name: "Prof. Michael Chen",
+        title: "Research Director, MIT Brain Lab",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=michael"
+      },
+      text: "The findings align well with recent studies in the field. I particularly appreciate the detailed discussion of limitations and potential future directions.",
+      timestamp: "2024-03-21T15:45:00Z"
+    },
+    {
+      id: 3,
+      author: {
+        name: "Dr. Emily Martinez",
+        title: "Lead Researcher, Brain-Computer Interfaces",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily"
+      },
+      text: "The statistical analysis is thorough and the conclusions are well-supported by the data. This work could have significant implications for BCI development.",
+      timestamp: "2024-03-22T09:15:00Z"
+    }
+  ]
 };
 
 // Log configuration load (for debugging)
