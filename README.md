@@ -1,310 +1,181 @@
-Pulse Scientific Chrome Extension – Extended Documentation
+# Pulse Scientific Chrome Extension
 
-This repository provides a Chrome extension and supporting backend services to overlay expert commentary on research articles. It allows experts to comment via email replies, seamlessly integrated with a custom UI displayed on top of web pages.
+## Overview
 
-Below is a more in-depth explanation of each folder and file, how the system fits together, and how to develop, test, and deploy this project.
+The Pulse Scientific Chrome Extension adds an interactive overlay to research articles, allowing verified experts to provide commentary via email replies. The extension creates a collaborative environment where scientific insights can be shared directly on research papers.
 
-Table of Contents
-	1.	Introduction
-	2.	High-Level Architecture
-	3.	Project Structure
-	•	Chrome Extension (public/)
-	•	UI Components (src/components/ui/)
-	•	API & Webhook Handlers (api/)
-	•	Scripts (scripts/)
-	•	Supabase Database (supabase/)
-	•	React App (src/)
-	•	Stories (src/stories/)
-	•	Configuration & Build Files
-	4.	Key Features
-	•	1. Email-Based Commenting
-	•	2. Expert Verification & Sign-In
-	•	3. Research Overlay UI
-	5.	Getting Started
-	•	Prerequisites
-	•	Installation
-	•	Running Locally
-	•	Developing the Chrome Extension
-	6.	Detailed Workflow
-	•	Sending Outbound Emails
-	•	Processing Inbound Email Replies
-	•	Comments and the Supabase Database
-	•	Security & Token Expiry
-	7.	Deployment & Production
-	•	Vercel Deployment for API Routes
-	•	SendGrid Setup
-	•	Publishing the Chrome Extension
-	8.	Testing the Email Flow
-	9.	UI Components Reference
-	10.	Troubleshooting
-	11.	License
+## Project Goals
 
-Introduction
+- Create a seamless way for experts to comment on scientific articles without requiring account creation
+- Enhance research papers with contextual expert commentary
+- Build a community around scientific discussion
+- Provide an intuitive overlay experience that works across different research sites
 
-The Pulse Scientific Chrome Extension provides a collaborative overlay on academic articles, enabling domain experts to comment on research findings directly via email replies. This repository includes:
-	•	Frontend: A Chrome extension injected into web pages to display an interactive UI.
-	•	Backend: API routes (via Next.js or Vercel serverless functions) that process inbound/outbound emails and store data in a Supabase database.
-	•	UI Libraries: A set of reusable UI components (derived from shadcn/ui) for building the overlay.
+## Key Features
 
-High-Level Architecture
-	1.	Chrome Extension injects a sidebar overlay on research article pages:
-	•	Displays expert commentary (fetched from Supabase).
-	•	Provides a sign-in flow (Google OAuth) so experts can see specialized content.
-	2.	Email-based Comments:
-	•	Experts receive a "request for insight" email with a unique token in the reply-to address.
-	•	When replying, the inbound webhook (api/inbound.ts) parses the email, validates the token, and stores the response as a comment.
-	3.	Supabase:
-	•	Stores all experts, comments, email tokens, and email events.
-	•	Supports API-based event tracking (api/webhook.ts).
-	4.	SendGrid:
-	•	Delivers outbound emails requesting commentary.
-	•	Receives inbound parse webhooks for replies and event webhooks for email analytics.
+### 1. Email-Based Commenting System
 
-Project Structure
+- **Simple Commenting**: Experts receive email requests for commentary and can reply directly to share insights
+- **Single-Use Tokens**: Each email contains a unique token that enables secure, verified replies
+- **Token Expiration**: Tokens expire after 7 days to maintain security
+- **Reply Processing**: Inbound email webhook parses replies and stores them as comments
 
-Below is a more detailed breakdown of the repository's main folders and files:
+### 2. Chrome Extension Overlay
 
-Chrome Extension (public/)
-	•	public/manifest.json
-Defines the Chrome extension. Defines the name, icons, permissions, content scripts, and background scripts. Notable fields:
-	•	permissions: Contains "activeTab", "identity", "identity.email" for Google OAuth.
-	•	background: Specifies background.js as the Service Worker.
-	•	content_scripts: Injects content.js + content.css into <all_urls>.
-	•	public/background.js
-A background service worker. Handles Google OAuth token retrieval using chrome.identity.getAuthToken(). Responds to messages from the content script.
-	•	public/content.js
-Injects the main UI overlay into the DOM. Sets up:
-	•	Header: A top banner with sign-in, branding, and metadata tags.
-	•	Left Sidebar: Expert commentary from Supabase.
-	•	Right Sidebar: Social discussion area, toggled with buttons.
-	•	Sign-In Flow: Connects to the background script to request the OAuth token.
-	•	public/content.css
-Styles for the injected overlay (headers, sidebars, toggles, etc.).
-	•	Icons (icon16.png, icon48.png, icon128.png)
-The extension icons in different resolutions.
+- **Sidebar Integration**: Non-intrusive overlay appears on research pages
+- **Expert Commentary**: Left sidebar displays verified expert comments
+- **Social Discussion**: Right sidebar enables community discussion
+- **Toggleable Interface**: Users can hide/show sidebars as needed
 
-UI Components (src/components/ui/)
+### 3. Expert Verification
 
-A large library of reusable UI primitives from the shadcn/ui library. Examples include:
-	•	button.tsx – Configurable <Button> component (variants: default, outline, ghost, etc.).
-	•	dialog.tsx – Modal dialog, used for advanced popups.
-	•	checkbox.tsx, select.tsx, slider.tsx, tabs.tsx, table.tsx, etc.
-	•	toast.tsx, use-toast.ts – Toast notifications system.
+- **Google OAuth**: Sign-in via Google accounts for experts
+- **Profile Management**: Expert profiles with verification status
+- **Email Verification**: Email-based token verification ensures comment authenticity
 
-You can reuse these UI building blocks in your extension's overlay or any React-based frontends.
+## Getting Started
 
-API & Webhook Handlers (api/)
-	•	api/inbound.ts
-Main webhook handler for inbound email (SendGrid Inbound Parse).
-Steps:
-	1.	Determines if it's event tracking or inbound email.
-	2.	For inbound email, parses the multipart form data to extract:
-	•	to, from, subject, text, html, etc.
-	3.	Validates a token from the "reply+@domain" address.
-	4.	Stores the comment in Supabase if the token is valid.
-	5.	Marks the token as used, preventing reuse.
-	•	api/webhook.ts
-Handles SendGrid event webhook (e.g., delivered, opened, clicked, etc.). Logs data to the email_events table in Supabase for analytics.
-	•	api/types.ts
-Contains shared TypeScript definitions for the Vercel request/response objects and any custom payload shapes.
-	•	api/test-email.ts
-A test endpoint to send a "request for comment" email to a specified address using sendInitialEmail() from src/lib/email.ts.
+### Prerequisites
 
-Scripts (scripts/)
-	•	scripts/test-email.ts
-A local script that can be run via tsx scripts/test-email.ts. It:
-	•	Fetches an expert from Supabase.
-	•	Calls sendInitialEmail() to deliver a request-for-comment message.
-	•	Demonstrates the flow without requiring a live endpoint to be invoked.
+- Node.js (v16+ recommended)
+- npm or yarn
+- Supabase account and project
+- SendGrid account with API key and verified domain
+- Chrome browser (for extension development)
 
-Supabase Database (supabase/)
-	•	supabase/migrations/
-A set of SQL files that define your database schema:
-	•	20240321000000_email_comments.sql: Creates comments, email_tokens, and experts tables.
-	•	20240322000000_email_events.sql: Creates an email_events table to store SendGrid event data.
-	•	Additional migrations that update schema, RLS policies, add columns, etc.
-	•	supabase/config.toml
-Supabase CLI config. Defines local dev ports, RLS policies, API usage, etc.
-	•	Database Tables:
-	1.	experts: Expert profiles with fields like name, email, title, verified, etc.
-	2.	comments: Stores user/expert-generated comments. Links back to experts via expert_email and references an article_id.
-	3.	email_tokens: Tracks one-time tokens that enable email-based comment replies.
-	4.	email_events: Logs inbound/outbound events from SendGrid for debugging and analytics.
+### Installation
 
-React App (src/)
-	•	src/App.tsx, src/main.tsx
-Boilerplate for a React app. Some routes are used for local dev, though the extension mostly uses content.js for injection.
-	•	src/lib/
-Shared library logic:
-	•	email.ts – Contains sendInitialEmail() to send out requests for commentary (via SendGrid).
-	•	webhooks.ts – Helper logic for handling inbound webhooks.
-	•	supabase.ts – Creates a Supabase client with your credentials.
-	•	utils.ts – Utility functions (e.g., cn() merges Tailwind classes).
-	•	src/components/home.tsx
-A trivial React component displayed at the base route.
-	•	src/index.css
-TailwindCSS global styles.
+```bash
+# Clone the repository
+git clone https://github.com/your-org/pulse-scientific.git
+cd pulse-scientific
 
-Stories (src/stories/)
-
-A series of Storybook stories for the UI components in src/components/ui/.
-Examples:
-	•	accordion.stories.tsx, alert-dialog.stories.tsx, etc.
-	•	Demonstrate each UI primitive's usage and variant props.
-
-While not strictly required for the extension, these stories are useful for visual testing and UI documentation.
-
-Configuration & Build Files
-	•	vite.config.ts – Vite config, uses @vitejs/plugin-react-swc.
-	•	tsconfig.json, tsconfig.node.json, tsconfig.server.json – TypeScript configurations for various aspects of the project (client, server, node).
-	•	postcss.config.js, tailwind.config.js – Tailwind and PostCSS settings.
-	•	.env – Contains environment variables like SENDGRID_API_KEY, VITE_SUPABASE_URL, etc.
-
-Key Features
-
-1. Email-Based Commenting
-	•	Request Email: Use sendInitialEmail() to ask an expert for comments.
-	•	Reply Parsing: The api/inbound.ts webhook extracts the token from the reply+<token>@domain address, then stores the reply as a new comment record.
-	•	One-Time Tokens: Each inbound token is single-use, ensuring controlled comment insertion.
-
-2. Expert Verification & Sign-In
-	•	Google OAuth: background.js obtains an OAuth token for the user.
-	•	Overlay: Once signed in, additional UI elements become interactive (e.g., "Reply", "Helpful" buttons).
-
-3. Research Overlay UI
-	•	The extension injects an overlay with:
-	•	Metadata tags (sample size, duration, effect size).
-	•	Expert Commentary (left sidebar).
-	•	Social Discussion (right sidebar).
-	•	Toggle Buttons to hide/show sidebars.
-
-Getting Started
-
-Prerequisites
-	1.	Node.js (v16+ recommended).
-	2.	npm or yarn for package management.
-	3.	A SendGrid account with an API key (and domain verified).
-	4.	A Supabase project with credentials for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
-	5.	Optionally, the Supabase CLI for local migrations.
-
-Installation
-
-git clone https://github.com/YourOrg/pulsev3.git
-cd pulsev3
+# Install dependencies
 npm install
 
-Running Locally
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your SendGrid and Supabase credentials
+```
 
-# Start local dev server
+### Environment Variables
+
+Create a `.env` file with the following:
+
+```
+SENDGRID_API_KEY=your_sendgrid_api_key
+SENDGRID_DOMAIN=your_verified_domain.com
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Development
+
+### Running Locally
+
+```bash
+# Start development server
 npm run dev
+```
 
-This command will run the Vite server, which you can use for local UI or Storybook-like testing. The extension itself still needs to be loaded into Chrome manually (see next section).
+### Building the Extension
 
-Developing the Chrome Extension
-	1.	Build the extension:
-
+```bash
+# Build the extension for production
 npm run build
+```
 
-This outputs a dist/ folder containing the manifest, scripts, and any compiled code.
+### Loading the Extension in Chrome
 
-	2.	Load the extension into Chrome:
-	•	Open chrome://extensions/
-	•	Enable "Developer mode"
-	•	Click "Load unpacked" and select the dist/ folder.
-	3.	Visit any webpage to see the overlay (injected via content.js).
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select the `dist/` directory from your project
+4. The extension should now appear in your browser
 
-Detailed Workflow
+## Testing the Email Flow
 
-Sending Outbound Emails
-	•	Use sendInitialEmail() from src/lib/email.ts to send a request for commentary.
-	•	An email token is created and stored in the email_tokens table.
-	•	The token is embedded in the replyTo address as reply+<token>@<SENDGRID_DOMAIN>.
+### Sending a Test Email
 
-Processing Inbound Email Replies
-	•	SendGrid's Inbound Parse forwards the entire email to api/inbound.ts.
-	•	The code checks to and looks for reply+<token>@....
-	•	If valid and not expired, a new comment is stored in the comments table.
+Use the provided test script to send an email to a specified expert:
 
-Comments and the Supabase Database
-	•	comments table references expert_email and an article_id.
-	•	Each inbound comment row can store additional metadata: message_id, dkim, spf, raw_headers, etc.
-	•	RLS (Row Level Security) ensures the data remains protected, but can be selectively read.
+```bash
+# Run the test email script
+npm run test:email
+```
 
-Security & Token Expiry
-	•	Single-use: Once used, a token in email_tokens is marked as used.
-	•	Expiry: Tokens typically expire after 7 days. This logic is set upon creation in sendInitialEmail().
+This script:
+1. Creates a one-time token in Supabase
+2. Embeds the token in the reply-to address
+3. Sends a test email requesting commentary
+4. Returns the token ID for tracking
 
-Deployment & Production
+### Testing the Reply Flow
 
-Vercel Deployment for API Routes
-1. Initial Setup (one-time only):
-   - Link the repo to Vercel: `vercel link`
-   - Configure environment variables in Vercel Dashboard:
-     - SENDGRID_API_KEY
-     - SENDGRID_DOMAIN
-     - VITE_SUPABASE_URL
-     - VITE_SUPABASE_ANON_KEY
+1. Wait for the test email to arrive
+2. Reply with your test comment
+3. The system will process your reply, strip quoted content, and store it as a comment
+4. View the comment in the extension overlay (may require refreshing the page)
 
-2. Ongoing Deployments:
-   - Deployments happen automatically when changes are pushed to the main branch
-   - No need to run deploy commands manually
-   - Vercel will build and deploy based on Git updates
+## Deployment
 
-The api/ folder's .ts files become serverless functions.
+### Vercel Deployment for API Routes
 
-SendGrid Setup
-	1.	Domain Authentication: Prove domain ownership (DKIM, SPF).
-	2.	Inbound Parse:
-	•	Set the "Host" or "Endpoint" to your Vercel domain plus /api/inbound.
-	•	Use raw MIME parse (multipart/form-data).
-	3.	Event Webhook:
-	•	Configure an endpoint for api/webhook.
+- Deployments happen automatically when changes are pushed to the main branch
+- No need to run deploy commands manually
 
-Publishing the Chrome Extension
-	1.	Build the extension: npm run build.
-	2.	Zip the dist/ folder contents.
-	3.	Upload to the Chrome Web Store Developer Dashboard.
+### Chrome Extension Publishing
 
-Testing the Email Flow
-	1.	Send a test email (either from your local environment or via the /api/test-email endpoint).
-Example:
+1. Build the extension: `npm run build`
+2. Zip the contents of the `dist/` directory
+3. Upload to the Chrome Web Store
 
-tsx scripts/test-email.ts
+## Project Structure
 
-This sends a test "request for comment" to the specified address.
+### Core Components
 
-	2.	Reply to that email from the expert's inbox.
-	3.	Check logs on Vercel (for inbound parse success) or run locally if you have your dev environment set up with a tunneling service.
-	4.	Verify the new comment appears in your Supabase comments table and in the UI overlay.
+- `/public/`: Chrome extension files (manifest.json, background.js, content.js)
+- `/api/`: Serverless API functions for handling webhooks and emails
+- `/src/`: React components and shared libraries
+- `/supabase/`: Database migrations and configurations
 
-UI Components Reference
+### Key Files
 
-The src/components/ui/ folder is a curated library from shadcn/ui. Notable components:
-	•	Alerts (alert.tsx), Dialogs (dialog.tsx)
-Provide user notifications or confirmations.
-	•	Forms (form.tsx, input.tsx, textarea.tsx, checkbox.tsx)
-Helpers for building accessible forms.
-	•	Overlays (popover.tsx, hover-card.tsx, tooltip.tsx)
-UI that appears on hover or click.
-	•	Data Display (table.tsx, badge.tsx, progress.tsx, skeleton.tsx)
-Quickly show tabular data, statuses, or placeholders.
+- `public/content.js`: Injects the overlay UI into research pages
+- `api/inbound.ts`: Processes inbound email replies from experts
+- `src/lib/email.ts`: Handles email generation and token creation
+- `public/background.js`: Manages Google OAuth and extension background services
 
-For usage examples, see the stories in src/stories/.
+## Database Structure
 
-Troubleshooting
-	1.	No Emails Sent
-	•	Check .env for correct SENDGRID_API_KEY.
-	•	Verify domain is authenticated in SendGrid.
-	2.	Inbound Webhook Failing
-	•	Confirm the SendGrid Inbound Parse is configured with the correct POST endpoint.
-	•	Check Vercel function logs for errors.
-	3.	Tokens Not Found or Already Used
-	•	Possibly the token is expired or used. Generate a new one.
-	4.	Comments Not Appearing
-	•	Make sure the article_id in your UI matches the article_id used in the token.
+The project uses Supabase with the following main tables:
 
-License
+- `comments`: Stores expert comments with links to articles
+- `email_tokens`: Tracks one-time tokens for email verification
+- `experts`: Contains expert profiles and verification status
+- `email_events`: Logs email delivery events from SendGrid
 
-This project is proprietary to [YourOrganization]. For inquiries about usage, please contact [YourOrganization Support]. You may also include any open-source licensing disclaimers here if applicable.
+## Troubleshooting
 
-Thank you for using the Pulse Scientific Chrome Extension! If you have questions, suggestions, or need further assistance, feel free to open an issue or contact the maintainers.
+### Email Flow Issues
+
+- **Email not received**: Check SendGrid API key and domain verification
+- **Token errors**: Ensure the expert email exists in the experts table
+- **Comment not appearing**: Verify the article ID exists in the database
+- **Parsing issues**: Check the API logs for inbound.ts errors
+
+### Extension Issues
+
+- **Overlay not appearing**: Ensure the extension is properly loaded and active
+- **Sign-in problems**: Check Google OAuth configuration in manifest.json
+- **Content loading slowly**: Consider optimizing comment fetching logic
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b my-feature`
+3. Commit your changes: `git commit -m 'Add feature'`
+4. Push to your branch: `git push origin my-feature`
+5. Open a pull request
+
