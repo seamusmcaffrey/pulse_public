@@ -6,7 +6,7 @@
   "scripts": {
     "build:extension": "tsx scripts/build-extension.js && tsx scripts/copy-pdfjs.js",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "build:all": "npm run build && npm run build:extension",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

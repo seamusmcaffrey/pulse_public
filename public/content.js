@@ -5,7 +5,6 @@ console.log('[DEBUG] Supabase config:', window.config?.supabase);
 // Global state variables for managing authentication and extension context
 let isSignedIn = false;
 let userInfo = null;
-let whitelistDomains = null;
 let extensionContextValid = true;
 let currentArticle = null;  // Add global currentArticle variable
 
@@ -912,23 +911,9 @@ async function fetchTrendingArticles() {
   }
 }
 
-/**
- * Checks if current domain is in whitelist
- * Used to determine if extension should activate
- * Case-insensitive domain matching
- * @param {string[]} domains Array of allowed domains
- * @returns {boolean} True if domain is supported
- */
-function isSupportedDomain(domains) {
-  if (!domains || domains.length === 0) {
-    console.warn('[DEBUG] No whitelist domains provided');
-    return false;
-  }
-
-  const currentDomain = window.location.hostname.toLowerCase();
-  const isSupported = domains.some(domain => currentDomain.includes(domain));
-  console.log('[DEBUG] Domain check:', { currentDomain, domains, isSupported });
-  return isSupported;
+// Remove whitelist-related functions and simplify domain check
+function isSupportedDomain() {
+  return true; // Always return true to show overlay on all pages
 }
 
 /**
@@ -939,18 +924,17 @@ function isSupportedDomain(domains) {
  * @param {string[]} whitelistDomains Array of allowed domains
  * @returns {Promise<void>}
  */
-async function createOverlay(whitelistDomains) {
-  console.log('[DEBUG] Starting overlay creation with whitelist:', whitelistDomains);
+async function createOverlay() {
+  console.log('[DEBUG] Starting overlay creation');
   
-  // Load fonts first
-  loadFonts();
-  
-  // Check if domain is supported
-  if (!isSupportedDomain(whitelistDomains)) {
-    console.log('[DEBUG] Domain not supported:', window.location.hostname);
+  if (!extensionContextValid) {
+    console.warn('[DEBUG] Extension context invalid, skipping overlay creation');
     return;
   }
 
+  // Load fonts first
+  loadFonts();
+  
   // Get layout adjustments based on content type
   const layout = getLayoutAdjustments();
   
@@ -1336,22 +1320,97 @@ async function createOverlay(whitelistDomains) {
 async function initialize() {
   console.log('[DEBUG] Starting initialization');
   
-  // Verify Supabase configuration
-  if (!window.config?.supabase?.url || !window.config?.supabase?.anonKey) {
-    console.error('[DEBUG] Missing Supabase configuration:', window.config);
-    return;
-  }
-
-  // Fetch whitelist first
-  const domains = await fetchWhitelist();
-  console.log('[DEBUG] Fetched whitelist domains for initialization:', domains);
-  
-  // Only proceed if we have domains and are on a supported domain
-  if (domains.length > 0 && isSupportedDomain(domains)) {
-    console.log('[DEBUG] Domain supported, creating overlay');
-    createOverlay(domains);
-  } else {
-    console.log('[DEBUG] Domain not supported or no whitelist domains available');
+  try {
+    // Load fonts first
+    loadFonts();
+    
+    // Create and show overlay immediately
+    await createOverlay();
+    
+    // Add dummy expert comments
+    const dummyExpertComments = [
+      {
+        id: 'exp1',
+        expert_email: 'dr.smith@university.edu',
+        content: 'This research presents a fascinating approach to the problem. The methodology is sound and the results are promising.',
+        created_at: '2024-03-25T10:00:00Z',
+        expert_name: 'Dr. Jane Smith',
+        expert_title: 'Professor of Computer Science',
+        expert_institution: 'University of Technology'
+      },
+      {
+        id: 'exp2',
+        expert_email: 'prof.jones@institute.org',
+        content: 'While the findings are interesting, I would suggest additional control experiments to validate the conclusions.',
+        created_at: '2024-03-26T15:30:00Z',
+        expert_name: 'Prof. Michael Jones',
+        expert_title: 'Research Director',
+        expert_institution: 'Institute of Advanced Studies'
+      }
+    ];
+    
+    // Add dummy social comments
+    const dummySocialComments = [
+      {
+        id: 'soc1',
+        user_name: 'ResearchEnthusiast',
+        content: 'Great paper! The implications for future research are exciting.',
+        created_at: '2024-03-27T09:15:00Z',
+        likes: 12
+      },
+      {
+        id: 'soc2',
+        user_name: 'ScienceStudent',
+        content: 'Could someone explain Figure 3 in more detail? I\'m having trouble understanding the correlation matrix.',
+        created_at: '2024-03-27T11:45:00Z',
+        likes: 8
+      },
+      {
+        id: 'soc3',
+        user_name: 'AcademicReader',
+        content: 'The literature review section is particularly comprehensive. Well done!',
+        created_at: '2024-03-28T14:20:00Z',
+        likes: 15
+      }
+    ];
+    
+    // Update the comments in the UI
+    const expertCommentsContainer = document.querySelector('.expert-comments-container');
+    if (expertCommentsContainer) {
+      expertCommentsContainer.innerHTML = dummyExpertComments.map(comment => `
+        <div class="comment-card pulse-font">
+          <div class="comment-header">
+            <strong>${comment.expert_name}</strong>
+            <span class="expert-title">${comment.expert_title}</span>
+            <span class="expert-institution">${comment.expert_institution}</span>
+          </div>
+          <div class="comment-content">${comment.content}</div>
+          <div class="comment-footer">
+            <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    const socialCommentsContainer = document.querySelector('.social-comments-container');
+    if (socialCommentsContainer) {
+      socialCommentsContainer.innerHTML = dummySocialComments.map(comment => `
+        <div class="comment-card pulse-font">
+          <div class="comment-header">
+            <strong>${comment.user_name}</strong>
+          </div>
+          <div class="comment-content">${comment.content}</div>
+          <div class="comment-footer">
+            <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
+            <span class="likes-count">❤️ ${comment.likes}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+  } catch (error) {
+    console.error('[DEBUG] Initialization error:', error);
+    showError('Failed to initialize extension');
   }
 }
 

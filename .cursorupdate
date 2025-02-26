@@ -209,24 +209,12 @@ Modified files:
 - Enhanced debugging logs for better troubleshooting
 - Improved matching strategy order: exact URL → normalized URL → DOI → fuzzy match
 
-[2024-03-30] Added whitelist feature for domain support
-- Created new Supabase migration (20240330000000_create_whitelist.sql):
-  - Added whitelist table with initial domains
-  - Added RLS policies for public read access
-  - Created index for faster domain lookups
-- Modified public/content.js:
-  - Added whitelist domain fetching from Supabase
-  - Updated isSupportedDomain() to use dynamic whitelist
-  - Modified createOverlay() to fetch whitelist before checking domain support
-
-[2024-03-30] Fixed whitelist initialization and domain checking
-- Modified public/content.js:
-  - Restructured initialization flow to ensure whitelist is loaded before domain check
-  - Added better error handling and logging for whitelist loading
-  - Improved domain checking with detailed debug information
-  - Fixed race condition between whitelist loading and domain check
-  - Added fallback for when DOM is already loaded
-  - Enhanced logging to track whitelist and domain check status
+[2024-03-30] Removed whitelist functionality and added dummy content
+- Deleted whitelist migration file (20240330000000_create_whitelist.sql)
+- Removed whitelist domain checking from content.js
+- Modified initialization to show overlay on all pages
+- Added dummy expert and social comments for testing
+- Fixed string escaping in social comments
 
 [2024-03-30] Improved Layout and Font Handling
 - Modified public/content.js:

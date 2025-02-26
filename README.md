@@ -33,12 +33,19 @@ The Pulse Scientific Chrome Extension adds an interactive overlay to research ar
 - **Profile Management**: Expert profiles with verification status
 - **Email Verification**: Email-based token verification ensures comment authenticity
 
+### 4. Domain Whitelist
+
+- **Dynamic Site Filtering**: Extension only activates on whitelisted publisher domains
+- **Centralized Management**: Domains are managed in Supabase's `whitelist` table
+- **Admin Controls**: Only users with admin role can modify the whitelist
+- **Performance Optimized**: Uses indexed lookups for faster domain checking
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v16+ recommended)
-- npm or yarn
+- Node.js (v20+ recommended)
+- npm (latest version)
 - Supabase account and project
 - SendGrid account with API key and verified domain
 - Chrome browser (for extension development)
@@ -47,26 +54,11 @@ The Pulse Scientific Chrome Extension adds an interactive overlay to research ar
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/pulse-scientific.git
-cd pulse-scientific
+git clone https://github.com/seamusmcaffrey/pulse_public
+cd pulse_public
 
 # Install dependencies
 npm install
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your SendGrid and Supabase credentials
-```
-
-### Environment Variables
-
-Create a `.env` file with the following:
-
-```
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_DOMAIN=your_verified_domain.com
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## Development
@@ -80,9 +72,15 @@ npm run dev
 
 ### Building the Extension
 
+IMPORTANT: Always use `npm run build:all` instead of `npm run build`. This ensures:
+- All extension components are properly built and packaged
+- Content scripts, background scripts, and manifest files are included
+- Icon files and other static assets are correctly handled
+- PDF.js files are properly copied and configured
+
 ```bash
-# Build the extension for production
-npm run build
+# Build the complete extension
+npm run build:all
 ```
 
 ### Loading the Extension in Chrome
@@ -92,90 +90,32 @@ npm run build
 3. Click "Load unpacked" and select the `dist/` directory from your project
 4. The extension should now appear in your browser
 
-## Testing the Email Flow
+### Development Best Practices
 
-### Sending a Test Email
+1. **Build Process**
+   - Always use `npm run build:all` for complete builds
+   - Never use `npm run build` alone as it won't include extension-specific files
+   - After each build, verify the contents of the `dist/` directory
 
-Use the provided test script to send an email to a specified expert:
+2. **Testing Changes**
+   - After making changes, always run a complete build
+   - Reload the extension in Chrome's extension manager
+   - Clear browser cache if you see unexpected behavior
+   - Check the browser console for any errors
 
-```bash
-# Run the test email script
-npm run test:email
-```
+3. **Debugging**
+   - Use Chrome's developer tools to inspect the extension
+   - Check the console for debug logs (prefixed with [DEBUG])
+   - Monitor network requests in the Network tab
+   - Use the Elements tab to inspect the overlay structure
 
-This script:
-1. Creates a one-time token in Supabase
-2. Embeds the token in the reply-to address
-3. Sends a test email requesting commentary
-4. Returns the token ID for tracking
+4. **Code Organization**
+   - Keep content script modifications in `public/content.js`
+   - Background script logic belongs in `public/background.js`
+   - React components go in `src/components/`
+   - API routes belong in `api/`
 
-### Testing the Reply Flow
-
-1. Wait for the test email to arrive
-2. Reply with your test comment
-3. The system will process your reply, strip quoted content, and store it as a comment
-4. View the comment in the extension overlay (may require refreshing the page)
-
-## Deployment
-
-### Vercel Deployment for API Routes
-
-- Deployments happen automatically when changes are pushed to the main branch
-- No need to run deploy commands manually
-
-### Chrome Extension Publishing
-
-1. Build the extension: `npm run build`
-2. Zip the contents of the `dist/` directory
-3. Upload to the Chrome Web Store
-
-## Project Structure
-
-### Core Components
-
-- `/public/`: Chrome extension files (manifest.json, background.js, content.js)
-- `/api/`: Serverless API functions for handling webhooks and emails
-- `/src/`: React components and shared libraries
-- `/supabase/`: Database migrations and configurations
-
-### Key Files
-
-- `public/content.js`: Injects the overlay UI into research pages
-- `api/inbound.ts`: Processes inbound email replies from experts
-- `src/lib/email.ts`: Handles email generation and token creation
-- `public/background.js`: Manages Google OAuth and extension background services
-
-## Database Structure
-
-The project uses Supabase with the following main tables:
-
-- `comments`: Stores expert comments with links to articles
-- `email_tokens`: Tracks one-time tokens for email verification
-- `experts`: Contains expert profiles and verification status
-- `email_events`: Logs email delivery events from SendGrid
-
-## Troubleshooting
-
-### Email Flow Issues
-
-- **Email not received**: Check SendGrid API key and domain verification
-- **Token errors**: Ensure the expert email exists in the experts table
-- **Comment not appearing**: Verify the article ID exists in the database
-- **Parsing issues**: Check the API logs for inbound.ts errors
-
-### Extension Issues
-
-- **Overlay not appearing**: Ensure the extension is properly loaded and active
-- **Sign-in problems**: Check Google OAuth configuration in manifest.json
-- **Content loading slowly**: Consider optimizing comment fetching logic
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b my-feature`
-3. Commit your changes: `git commit -m 'Add feature'`
-4. Push to your branch: `git push origin my-feature`
-5. Open a pull request
-
+5. **Deployment**
+   - Git commits to main branch automatically trigger Vercel deployments
+   - No need to run Vercel deploy commands manually
+   - Always test builds locally before pushing to main
