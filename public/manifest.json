@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "Pulse Scientific",
+  "version": "1.0",
+  "description": "Expert commentary on research articles",
+  "permissions": [
+    "identity",
+    "identity.email",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://xuypxquhkubappzovinl.supabase.co/*"
+  ],
+  "oauth2": {
+    "client_id": "980371095085-35ohqje4ev5t3pe5clg1610o8t5l48a0.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "key": "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCgc9Vf86CYbzg2X62VX2jUGV1yC5BdGdld3Wao7B+ZrY0kOc7lID1h4Si8CnhjzM0RUxRy5Rq8eEl2eFmwt2WkA9cJg9U3D3tDoHgvGWp0WIsRjZcOoB+lPhtvtal2l2EpXisGeYV8G7D44E0KEY1vV0XYl3lZBMsYCAPZ9Y3sNOubShYvP/ZvH0I6XXL2xvebYrOfN+zM2LwLtab+c1wwXy1dFNrsG7U4q18SHpRYokVpXg4neH2Zd+7ICmzLNDx+eYhuanUgfWgyk4oP5IeE9P3jKi1S1peBNZw4cZZt2xND8Ji5cYtTEdwud/ryp7nc08BHhU4GJEk0sAUixxAhAgMBAAECggEASC/1BqdIUGxxYN0o7nQvaIVE6mNTft97UOSkJEmfafeP8YVklOctVpUDS552TYg9lpbHM23p2nNPsdIxn/TS8LidjXVXft8jOOjASYhowZF4d9w44uaddi18EIUtieJPX1ozh0UzDgQzWbUoU+hTto0QKoLzoF4stVId0XjNckAiZ66Oen4ag0Y9P+CKEeC4l1OjNCMxjacxfKQCgbW9ruY6PnlVr1pskLnTt6tdY2YtxhnS33c2QdoXq7WuQYu+pbUCGGeK0zdZZ/ceLy4XQoDy79UdgAOFcO+PnRb4/LLeukfC8/4/thS+pHb6Dv60LacYLrmZta45kz6ifTJMhQKBgQDSJQD9b3QyvudruVthzA9XSZZlKQ9IHdYV9sNo92fRIxZkDy9QkYJT9s1ngjD6U6CxRarF4uH9n8G8iofaGmaODs2qfkByUyf1kxDkEqROvcN87JR9hgRSrLrqQOPtdx9HN535S3h71rp1ih270NN7yNcXmOJHJhn40lWP8oXCKwKBgQDDdvRURnIphU2ig0jhilaSDdAjtiLCYywE4tyqUQ0ytjfavbh+r/+C71inZvSMCwAyWO1DclobkCpnxw2jladUYyeDstW83htL42SxYMHaxwkIBzp3fCuooUd9i7r/rXbWgBtSmfBPq/Od4tw8E4FVOxt90Z65rXu9CAvMNqWs4wKBgFNu5am5qoTLTs5yVVnKzvx09wVK/ApB7lHiG0t9jvZ129n2PW7blscHYh4Kjq+UrGQ1qMvQfLFZ0G2vAqkRek5Eilt6rNO3OFJEBZzH2fx5UzgyJfKAVw8MDVocUWJivURlTI9B66AfbQBlydBb5NtsrhlsVcqx0fX8bIQuYfTpAoGAEx1p7WfqOCdCHVdrZCsMJkJVjXh9U7cxEdVBsSI2ATSSp8CP70u02BAiAlTuK1fUEBhkM4lWSIXDr9xmeA3ljDoaHiX6AvtRfg1hxnro2kVGm9NhI1gwSNBk1mE4y1IiYf2rLlvBhXkSXOlXkkRyDGy4VoiOVigiBq1nwfPCJfMCgYB+UCJYK2awXqND7lDDdcp6gOvb8emF/uLYL+wmCJieFTK7LS6GXEWO3PkzoCzS4g/UxQm/Xrs0K9ypIJe0Dv3pE6NIgH7XX2AfuOR5Ke5GYNWzVq1HlaPXnGiaholyRltTn2xv7PPkO7T+FponhyqeZkgq8cpJ1Y5weV1lywmxrQ==",
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["config.js", "content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.supabase.co"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["config.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

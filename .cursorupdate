@@ -1,0 +1,509 @@
+ALL UPDATES TO THIS FILE SHOULD BE APPENDED TO THE END OF THE FILE.
+
+[2024-03-26] Extension Enhancement: Article-Based Display and Trending Research
+- Updated content.js to only display the extension overlay on articles present in our database
+- Added article metadata display in the header (sample, duration, effect_size, design, rigor)
+- Split right sidebar to include both social discussion and trending research sections
+- Added trending research component that displays up to 5 trending articles
+- Enhanced CSS styling for metadata tags and trending article cards
+- Improved sidebar scrolling behavior with custom scrollbar styling
+- Updated article ID handling in comments to use the actual database ID
+
+[2024-03-26] Security Enhancement: Environment Variables in Extension
+- Created src/config.ts to manage environment variables
+- Updated vite.config.ts to inject environment variables during build
+- Refactored content.js to use injected environment variables instead of hardcoded values
+- Improved security by removing hardcoded API keys from source code
+
+[2024-03-26] Improved Metadata Handling
+- Added formatMetadata helper function to handle null/undefined/empty values
+- Enhanced metadata display with separate label and value styling
+- Added hover effects to metadata tags
+- Improved robustness of metadata display when fields are missing
+- Added graceful fallbacks for empty or invalid metadata values
+
+[2024-03-26] Fixed Extension Build Process and Icon Structure
+- Updated scripts/build-extension.js to properly handle icon files in public/icons directory
+- Fixed icon file paths in build script to match manifest.json expectations
+- Verified successful build with icons copying to correct location
+
+[2024-03-27] Article URL Matching and Database Schema
+- Added articles table schema in supabase/migrations/20240327000000_create_articles.sql
+- Updated content.js to normalize article URLs before matching:
+  - Added normalizeUrl() function to handle ScienceDirect and other URLs consistently
+  - Improved logging for article and comment fetching
+  - Added better error handling and debugging information
+- Fixed URL matching to work with ScienceDirect article IDs
+- Added indexes on articles.link and articles.doi for better performance
+
+[2024-03-28] Fixed Article/Comment Matching
+- Added migration to fix article IDs in comments and email_tokens tables
+- Improved URL normalization to handle more cases:
+  - Better ScienceDirect URL handling
+  - Removal of tracking parameters
+  - Fuzzy matching for URLs with query parameters
+- Added detailed debug logging for URL matching process
+- Fixed issue with newlines in article IDs
+- Synchronized article IDs between comments and email_tokens tables
+
+[2024-03-29] Fixed Article ID and Trending Articles Issues
+
+1. Database Schema Updates:
+- Created migration to convert article_id in comments and email_tokens tables to UUID type
+- Added foreign key constraints to ensure referential integrity
+- Added indexes on article_id columns for better performance
+- Created migration to properly handle trending articles with ranks
+
+2. Content Script Updates:
+- Enhanced debug logging in fetchArticleData, fetchComments, and fetchTrendingArticles
+- Improved error handling and validation of article IDs
+- Added UUID format validation for article IDs
+- Updated trending articles query to handle null ranks properly
+- Added validation of trending article data structure
+
+3. Key Changes:
+- All article IDs are now UUIDs across all tables
+- Legacy article IDs are mapped to valid UUIDs
+- Trending articles maintain proper rank ordering
+- Added constraints to ensure data integrity
+- Improved error logging for debugging
+
+4. Migration Steps:
+- Run npm run build after applying changes
+- Changes will be automatically deployed via Vercel
+- Monitor console logs for any remaining issues
+
+Modified files:
+- supabase/migrations/20240328000000_fix_article_ids.sql: Added migration to fix article IDs
+- public/content.js: Improved URL normalization and added debug logging
+- public/content.js: Added fuzzy URL matching for better article detection
+- public/content.css: Added new styles for metadata tags and trending research cards
+- src/config.ts: Added new configuration file
+- vite.config.ts: Added environment variable injection
+- public/content.js: Replaced hardcoded values with environment variables
+- scripts/build-extension.js: Updated icon file paths and improved build process
+- public/icons/*: Moved icon files to dedicated icons directory
+
+[2024-03-29] Fixed Supabase Configuration and URL Issues
+
+1. Configuration Injection:
+- Updated vite.config.ts to properly inject Supabase configuration
+- Created public/config.js to ensure configuration is available
+- Added default values for local development
+- Fixed window.config structure for content script access
+
+2. Content Script Updates:
+- Added debug logging for configuration verification
+- Improved error handling for missing configuration
+- Updated fetch requests to use correct Supabase URL
+- Enhanced logging for URL normalization and matching
+
+3. Manifest Updates:
+- Added config.js to content_scripts
+- Ensured proper script loading order
+
+4. Key Changes:
+- Fixed 404 errors caused by incorrect Supabase URL
+- Improved error handling and debugging
+- Added fallback to local development configuration
+- Fixed article matching and comment loading
+
+5. Testing Steps:
+- Verified configuration injection
+- Confirmed proper URL normalization
+- Tested article matching and comment loading
+- Validated trending articles display
+
+Modified files:
+- public/manifest.json: Updated content script loading
+- public/content.js: Added debug logging and fixed styling
+- public/config.js: Ensured proper configuration loading
+
+[2024-03-29] Fixed UI Visibility and DOM Injection Issues
+
+1. DOM Injection Improvements:
+- Added comprehensive debug logging throughout createOverlay()
+- Ensured proper DOM content loaded event handling
+- Fixed race conditions in overlay creation
+- Added inline styles for guaranteed visibility
+
+2. UI Component Updates:
+- Header now has fixed position and high z-index
+- Left sidebar properly positioned with scrolling
+- Right sidebar properly positioned with scrolling
+- Added box shadows and proper spacing
+- Improved comment and trending article card styling
+
+3. Content Loading:
+- Added async/await pattern for better error handling
+- Improved error messages and loading states
+- Added validation for fetched data
+- Enhanced debug logging for data flow
+
+4. Manifest Updates:
+- Added run_at: "document_end" to ensure proper loading
+- Confirmed correct script loading order
+- Removed toggle buttons to simplify layout
+
+5. Testing Steps:
+- Verified overlay appears on matching articles
+- Confirmed comments are properly displayed
+- Validated trending articles section
+- Checked all debug logs for proper execution flow
+
+Modified files:
+- public/manifest.json: Updated content script loading
+- public/content.js: Added debug logging and fixed styling
+- public/config.js: Ensured proper configuration loading
+
+[2024-03-29] Build Process Update: Use npm run build:all
+1. Build Process Requirements:
+- ALWAYS use `npm run build:all` instead of `npm run build`
+- This ensures all extension components are properly built and packaged
+- Includes content scripts, background scripts, and manifest files
+- Handles icon files and other static assets correctly
+
+2. Key Changes:
+- Updated build instructions in documentation
+- Corrected previous build steps
+- Ensures consistent build output
+
+3. Why This Matters:
+- Prevents missing assets in the extension
+- Ensures metadata buttons and UI elements are properly included
+- Maintains correct file structure in the build output
+
+Modified files:
+- .cursorupdate: Added build process clarification
+- Previous builds should be redone with `npm run build:all`
+
+[2024-03-29] Enhanced Article URL Matching
+
+1. URL Normalization Improvements:
+- Added support for tandfonline.com URLs in normalizeUrl function
+- Improved DOI extraction from Taylor & Francis URLs
+- Enhanced URL cleaning by removing more tracking parameters
+- Added better handling of hash fragments
+
+2. Article Matching Logic Updates:
+- Added three-step article matching process:
+  1. Exact URL match
+  2. Fuzzy URL match (ignoring query parameters)
+  3. DOI-based match for tandfonline.com URLs
+- Improved debug logging throughout the matching process
+- Added better error handling and validation
+
+3. Key Changes:
+- Extension now properly detects articles from both sciencedirect.com and tandfonline.com
+- More robust URL normalization for different article URL formats
+- Better handling of DOIs in the database matching process
+
+Modified files:
+- public/content.js: Updated normalizeUrl and fetchArticleData functions
+- .cursorupdate: Documented latest changes
+
+[2024-03-29] Enhanced Article Matching Logic
+- Modified public/content.js to improve article matching for different publishers
+- Added DOI-based matching for Taylor & Francis articles
+- Updated URL normalization to use canonical formats
+- Enhanced debugging logs for better troubleshooting
+- Improved matching strategy order: exact URL → normalized URL → DOI → fuzzy match
+
+[2024-03-30] Added whitelist feature for domain support
+- Created new Supabase migration (20240330000000_create_whitelist.sql):
+  - Added whitelist table with initial domains
+  - Added RLS policies for public read access
+  - Created index for faster domain lookups
+- Modified public/content.js:
+  - Added whitelist domain fetching from Supabase
+  - Updated isSupportedDomain() to use dynamic whitelist
+  - Modified createOverlay() to fetch whitelist before checking domain support
+
+[2024-03-30] Fixed whitelist initialization and domain checking
+- Modified public/content.js:
+  - Restructured initialization flow to ensure whitelist is loaded before domain check
+  - Added better error handling and logging for whitelist loading
+  - Improved domain checking with detailed debug information
+  - Fixed race condition between whitelist loading and domain check
+  - Added fallback for when DOM is already loaded
+  - Enhanced logging to track whitelist and domain check status
+
+[2024-03-30] Improved Layout and Font Handling
+- Modified public/content.js:
+  - Added proper Alexandria font loading with fallbacks
+  - Improved layout handling for PDF content
+  - Added smart content type detection
+  - Adjusted spacing and margins based on content type
+  - Added custom scrollbar styling for sidebars
+  - Fixed font consistency across all components
+  - Reduced header height and adjusted spacing
+  - Added dynamic layout adjustments for different content types
+  - Improved PDF viewer compatibility
+
+[2024-03-30] Improved Content Layout and Header Text
+- Modified public/content.js:
+  - Created new main content container to properly bound page content
+  - Added content wrapper to handle PDF and regular content
+  - Fixed header text wrapping issues
+  - Reduced header font sizes to prevent overflow
+  - Added text ellipsis for long header titles
+  - Improved scrolling behavior for main content
+  - Removed margin-based layout in favor of fixed positioning
+  - Added proper content padding and spacing
+  - Fixed z-index stacking for proper overlay rendering
+
+[2024-03-30] Improved PDF Viewer Handling
+- Modified public/content.js:
+  - Added specialized handling for PDF viewer elements
+  - Created PDF-specific wrapper with proper positioning
+  - Maintained PDF viewer controls and functionality
+  - Fixed PDF viewer sizing and scrolling
+  - Added better content type detection
+  - Improved layout containment for PDF content
+  - Added debug logging for PDF handling
+  - Fixed z-index stacking for PDF viewer
+
+[2024-03-30] Added PDF.js Integration for Better PDF Handling
+- Modified public/content.js:
+  - Added PDF.js library integration for robust PDF rendering
+  - Created custom PDF viewer with controls (prev/next/zoom)
+  - Added PDF toolbar with page navigation
+  - Improved PDF rendering with proper scaling and aspect ratio
+  - Fixed z-index issues with PDF display
+  - Added responsive PDF resizing
+  - Maintained proper layering with sidebars
+  - Added error handling for PDF loading
+  - Added loading state and user feedback
+
+2024-03-20 - Google Auth Flow Updates
+
+Files modified:
+- public/background.js: Updated OAuth flow to use launchWebAuthFlow and proper token exchange with Supabase
+- public/manifest.json: Updated OAuth scopes and CSP for chromiumapp.org
+- public/auth-handler.js: Improved token handling and Supabase session management
+- supabase/migrations/20240320000000_auth_policies.sql: Added RLS policies for secure data access
+
+Changes:
+- Switched to proper Chrome extension OAuth flow using chrome.identity.launchWebAuthFlow
+- Updated redirect URI to use chromiumapp.org format
+- Added proper ID token and access token handling
+- Implemented secure token exchange with Supabase
+- Added comprehensive RLS policies for data security
+
+[2024-03-30] Fixed OAuth Token Exchange Implementation
+
+1. Critical OAuth Fixes:
+- Modified supabase.js to properly handle token exchange:
+  - Added client_id parameter to token exchange request
+  - Improved PKCE implementation
+  - Enhanced error handling and logging
+  - Removed redundant nonce handling
+  
+2. Background Script Updates:
+- Streamlined OAuth flow in background.js:
+  - Clearer step-by-step flow implementation
+  - Better error handling
+  - Proper passing of Supabase anon key
+  - Improved session management
+
+3. Key Changes:
+- Fixed "unsupported_grant_type" error in token exchange
+- Improved OAuth flow reliability
+- Enhanced debug logging
+- Streamlined authentication process
+
+Modified files:
+- public/supabase.js: Updated token exchange implementation
+- public/background.js: Improved OAuth flow handling
+
+[2024-03-30] Critical OAuth Token Exchange Fixes
+
+1. Root Cause Analysis & Final Fixes:
+- Modified supabase.js token exchange implementation:
+  - Added missing client_secret parameter (critical fix)
+  - Corrected OAuth token endpoint to /auth/v1/oauth/token
+  - Maintained existing client_id and PKCE parameters
+  - Full parameter set now matches Supabase requirements
+
+2. Technical Details:
+- Token endpoint changed from /auth/v1/token to /auth/v1/oauth/token
+- Request body now includes both client_id and client_secret
+- Content-Type remains application/x-www-form-urlencoded
+- All PKCE parameters preserved
+
+Modified files:
+- public/supabase.js: Added client_secret and corrected token endpoint
+
+[2024-03-30] Fixed Content Script Message Handling
+
+1. Critical Content Script Fixes:
+- Modified content.js sign-in implementation:
+  - Added proper Chrome runtime availability check
+  - Removed retry logic causing infinite loops
+  - Added user-facing error messages
+  - Improved error state handling and UI feedback
+
+2. Technical Details:
+- Added showError function for user feedback
+- Added updateAuthState function for auth state management
+- Improved runtime availability detection
+- Enhanced error logging and handling
+- Removed setTimeout retry mechanism
+
+3. Key Changes:
+- Fixed "chrome.runtime.sendMessage not available" infinite loop
+- Added visual feedback for extension loading issues
+- Improved error handling and user experience
+- Added graceful fallback for runtime initialization issues
+
+Modified files:
+- public/content.js: Updated sign-in implementation and error handling
+
+[2024-03-30] Improved OAuth Error Handling
+
+1. Critical Error Handling Fixes:
+- Modified supabase.js token exchange implementation:
+  - Added content-type validation before JSON parsing
+  - Added detailed response header logging
+  - Improved error message formatting
+  - Added parameter validation logging
+
+2. Technical Details:
+- Added content-type check to prevent JSON parse errors
+- Enhanced error logging with response headers
+- Added parameter validation logging
+- Improved error stack trace logging
+- Added response text capture for HTML errors
+
+3. Key Changes:
+- Fixed "Unexpected non-whitespace character" JSON parse errors
+- Added better visibility into token exchange issues
+- Improved debugging capabilities
+- Enhanced error reporting for support
+
+Modified files:
+- public/supabase.js: Enhanced error handling and logging in token exchange
+
+[2024-03-30] Added Extension Context Management
+
+1. Critical Context Management Fixes:
+- Modified content.js to handle extension context:
+  - Added extension context validation tracking
+  - Added reload event detection
+  - Added user-facing reload prompts
+  - Improved error state handling
+
+2. Background Script Updates:
+- Added extension update detection in background.js:
+  - Added onInstalled event handler
+  - Added tab notification system
+  - Added error handling for notifications
+  - Added debug logging for updates
+
+3. Key Changes:
+- Fixed "Extension context invalidated" errors
+- Added graceful handling of extension updates
+- Improved user experience during development
+- Added proper cleanup on extension reload
+
+4. Technical Details:
+- Added extensionContextValid state tracking
+- Added chrome.runtime.onInstalled handler
+- Added chrome.tabs.sendMessage for notifications
+- Added comprehensive error handling
+- Added debug logging throughout
+
+Modified files:
+- public/content.js: Added context validation and reload handling
+- public/background.js: Added update detection and notification system
+
+# Chrome Extension OAuth Flow Update
+
+## Changes Made
+1. Modified `public/background.js`:
+   - Temporarily bypassed Supabase authentication
+   - Implemented direct Google OAuth flow using chrome.identity
+   - Added proper error handling and logging
+   - Added scopes to getAuthToken call
+
+2. Updated `public/manifest.json`:
+   - Added 'openid' scope to OAuth2 configuration
+   - Ensured correct permissions for identity and storage
+   - Verified content security policy for API access
+
+3. Enhanced `public/content.js`:
+   - Improved user info handling in updateAuthState
+   - Added better error handling for auth flow
+   - Enhanced logging for debugging
+   - Added proper null state handling
+
+## Testing Instructions
+1. Load the extension in Chrome
+2. Click the sign-in button
+3. Verify Google OAuth consent screen appears
+4. Check that user info is properly displayed after login
+5. Verify console logs for debugging information
+
+## Next Steps
+1. Re-enable Supabase integration once Google OAuth is confirmed working
+2. Implement proper token exchange with Supabase
+3. Add session management
+4. Implement proper error handling for Supabase integration
+
+# Session Management and Database Fixes - 2024-03-20 (Update 2)
+
+## Database Changes
+1. Added new migration (20240320000001_fix_user_sessions.sql):
+   - Verifies user_sessions table exists in public schema
+   - Creates table if missing with correct structure
+   - Updates RLS policies to allow anonymous operations
+   - Ensures proper trigger for updated_at column
+   - Fixes potential permission issues with existing policies
+
+2. Modified RLS Policies:
+   - Added "Allow anonymous reads" policy
+   - Added "Allow anonymous updates" policy
+   - Removed email = current_user restriction
+   - Ensures proper access for extension operations
+
+## Code Changes
+1. Enhanced updateUserSession in background.js:
+   - Added Supabase endpoint verification
+   - Improved error handling and debugging
+   - Added comprehensive response logging
+   - Added fallback for failed session checks
+   - Enhanced payload validation
+
+2. Added New Features:
+   - verifySupabaseEndpoint function to check API accessibility
+   - Better session existence checking
+   - Detailed response logging
+   - Proper Accept headers for JSON responses
+
+## Testing Instructions
+1. Apply the new migration to your Supabase database
+2. Run npm run build:all to rebuild the extension
+3. Test the Google sign-in flow
+4. Verify in Supabase dashboard that sessions are being created/updated
+5. Check console logs for improved error messages and debugging info
+
+## Security Considerations
+- Anonymous access is now properly configured for extension operations
+- All requests include proper Authorization headers
+- Input validation added for session data
+- Endpoint verification ensures API availability
+
+## Troubleshooting
+If you encounter 404 errors:
+1. Verify the migration has been applied
+2. Check the Supabase dashboard for the user_sessions table
+3. Verify the RLS policies are correctly set
+4. Check the console logs for detailed error information
+
+[2024-03-28] Updated Social Comments Integration
+- Fixed social comments to properly use social_comments table
+- Updated loadSocialComments function to fetch from social_comments table
+- Updated setupCommentForm to properly handle user authentication
+- Added proper error handling for auth state
+- Improved user data fetching with supabase.auth.getUser()
+- Enhanced comment display with user avatars and names

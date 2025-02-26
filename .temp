@@ -1,0 +1,5 @@
+Currently our extension is only showing on the first link below but it should be displayed on all of the articles that have an entry in our articles database backend table which includes the second link below... Can you check how this logic works and make sure that we are allowing for any article that is in the articles database backend to trigger the extension to show up
+
+@https://www.sciencedirect.com/science/article/pii/S2211335518302638 
+
+@https://www.tandfonline.com/doi/abs/10.1080/00220671.2024.2423177 
